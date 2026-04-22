@@ -1,4 +1,4 @@
-name: CI - app_simpless
+name: CI - app_simples
 
 on: 
   push:
