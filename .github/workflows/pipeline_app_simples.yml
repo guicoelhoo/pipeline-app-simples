@@ -6,8 +6,7 @@ on:
 
 jobs:
 
- build:
-
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,24 +25,25 @@ jobs:
       - name: Push com Docker Compose
         run: docker compose push
 
-deploy:
-  needs: build
-  runs-on: ubunto-latest
-  steps:
-    -name: Deploy via SSH (Appleboy)
-    -uses: appleboy/ssh-action@master
-    with:
-      host: ${{secrets.SSH_USER }}
-      key: ${{ secrets.SSH_KEY }}
-      script: |
-        # entra na home do usuário
-        cd ~
-        # se o projeto nao existe, clona. Se existe, pull
-        if [ ! -d "guilherme-app" ]; then
-          gitclone https://github.com/${{ github.repository }} guilherme-app
-        fi
-        cd guilherme-app
-        git pull originmain
-        docker compose pull
-        docker compose up -d
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
 
+    steps:
+      - name: Deploy via SSH (Appleboy)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~
+
+            if [ ! -d "guilherme-app" ]; then
+              git clone https://github.com/${{ github.repository }} guilherme-app
+            fi
+
+            cd guilherme-app
+            git pull origin main
+            docker compose pull
+            docker compose up -d
