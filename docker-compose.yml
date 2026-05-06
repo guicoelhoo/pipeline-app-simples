@@ -2,8 +2,8 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: fatec_user
-      POSTGRES_PASSWORD: fatec_password
+      POSTGRES_USER: guilherme_user
+      POSTGRES_PASSWORD: guilherme_password
       POSTGRES_DB: todolist
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -16,14 +16,15 @@ services:
     depends_on:
       - db
     ports:
-      - "3000:3000"
+      - "3018:3000"
 
   web:
     build: ./frontend
+    container_name: guilherme_web
     ports:
-      - "80:80"
+      - "8018:80"
     depends_on:
       - api
 
 volumes:
-  postgres_data:
+  guilherme_data:
