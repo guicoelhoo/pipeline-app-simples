@@ -1,37 +1,46 @@
 services:
   db:
     image: postgres:15-alpine
+    container_name: guilherme_db
     environment:
       POSTGRES_USER: guilherme_user
       POSTGRES_PASSWORD: guilherme_password
       POSTGRES_DB: todolist
     volumes:
       - guilherme_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U guilherme_user -d todolist"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   api:
     build: ./backend
     container_name: guilherme_api
-    restart: always  # <-- Se a API cair, o Docker sobe ela de novo até o banco estar pronto.
-    environment:
-      DB_HOST: db
-    depends_on:
-      - db
+    restart: always
     ports:
       - "3018:3000"
-
+    environment:
+      DB_HOST: db
+      DB_USER: guilherme_user
+      DB_PASSWORD: guilherme_password
+      DB_NAME: todolist
+    depends_on:
+      db:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000/tarefas || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-      
-
+      # Use wget (mais seguro que curl em Alpine)
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/tarefas >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"   # Cada arquivo de log terá no máximo 10MB
-        max-file: "3"     # O Docker guarda apenas os últimos 3 arquivos (total 30MB)  
+        max-size: "10m"
+        max-file: "3"
 
   web:
     build: ./frontend
@@ -41,6 +50,12 @@ services:
     depends_on:
       api:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/ >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   guilherme_data:
