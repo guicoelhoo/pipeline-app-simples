@@ -10,6 +10,7 @@ services:
 
   api:
     build: ./backend
+    container_name: guilherme_api
     restart: always  # <-- Se a API cair, o Docker sobe ela de novo até o banco estar pronto.
     environment:
       DB_HOST: db
