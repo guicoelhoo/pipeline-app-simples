@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: guilherme_password
       POSTGRES_DB: todolist
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - guilherme_data:/var/lib/postgresql/data
 
   api:
     build: ./backend
